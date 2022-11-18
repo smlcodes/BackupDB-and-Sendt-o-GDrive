@@ -1,19 +1,10 @@
-https://github.com/daniloaz/myphp-backup/blob/master/myphp-backup.php
-
-# Backup SQL Database using PHP
-You can update DB Details & find orginal code
-https://github.com/daniloaz/myphp-backup/blob/master/myphp-backup.php
-
-
-
-```php
 <?php 
 /**
  * This file contains the Backup_Database class wich performs
-   $dbhost = 'sql301.XXX.com';
-   $dbuser = 'epizXXXXX';
-   $dbpass = 'AF6tXXXX';
-   $dbname = "epiz_XXXXX"; 
+   $dbhost = 'sql301.epizy.com';
+   $dbuser = 'epiz_32875882';
+   $dbpass = 'AF6tE0XjpZUX';
+   $dbname = "epiz_32875882_javabo"; 
  * a partial or complete backup of any given MySQL database
  * @author Daniel López Azaña <daniloaz@gmail.com>
  * @version 1.0
@@ -22,9 +13,9 @@ https://github.com/daniloaz/myphp-backup/blob/master/myphp-backup.php
 /**
  * Define database parameters here
  */
-define("DB_USER", 'XXXX');
-define("DB_PASSWORD", 'XXXXX');
-define("DB_NAME", 'DBXXXX');
+define("DB_USER", 'epiz_32875882');
+define("DB_PASSWORD", 'AF6tE0XjpZUX');
+define("DB_NAME", 'epiz_32875882_javabo');
 define("DB_HOST", 'sql301.epizy.com');
 //define("BACKUP_DIR", 'myphp-backup-files'); // Comment this line to use same script's directory ('.')
 define("TABLES", '*'); // Full backup
@@ -114,7 +105,7 @@ class Backup_Database {
         $this->charset                 = $charset;
         $this->conn                    = $this->initializeDatabase();
         $this->backupDir               = BACKUP_DIR ? BACKUP_DIR : '.';
-        $this->backupFile              = 'myphp-backup-'.$this->dbName.'-'.date("Ymd_His", time()).'.sql';
+        $this->backupFile              = 'bkp.sql';
         $this->gzipBackupFile          = defined('GZIP_BACKUP_FILE') ? GZIP_BACKUP_FILE : true;
         $this->disableForeignKeyChecks = defined('DISABLE_FOREIGN_KEY_CHECKS') ? DISABLE_FOREIGN_KEY_CHECKS : true;
         $this->batchSize               = defined('BATCH_SIZE') ? BATCH_SIZE : 1000; // default 1000 rows
@@ -504,114 +495,3 @@ $output = $backupDatabase->getOutput();
 if (php_sapi_name() != "cli") {
     echo '</div>';
 }
-
-```
-By default backup files will be called myphp-backup-{DB_NAME}-YYYYmmdd-HHMMSS.sql.gz and stored in myphp-backup-files subdirectory. Example output backup file:
-
-myphp-backup-files/myphp-backup-daniloaz-20170828-131745.sql.gz
-
-
-
-# Google DRIVE PHP integration
-
-
-
-Create Google Project and Enable Drive API
-------------------------------------------
-
-Google Project is required to get the API keys that will be used to make API calls to Google Drive. If you already have an existing Google Application, API keys can be used from it. Just make sure that the Google Drive API is enabled in this existing Google project. If you don't any Google applications, follow the below steps to register your application on Google Developers Console and get the API keys.
-
--   Go to the [Google API Console](https://console.developers.google.com/).
--   Select an existing project from the projects list, or click **NEW PROJECT** to create a new project:
-
-    ![google-api-console-project-create-codexworld](https://www.codexworld.com/wp-content/uploads/2022/01/google-api-console-project-create-codexworld-1024x362.png)
-
-    -   Type the **Project Name**.
-    -   The project ID will be created automatically under the Project Name field. (Optional) You can change this project ID by the **Edit** link, but it should be unique worldwide.
-    -   Click the **CREATE** button.
--   Select the newly created project and enable the **Google Drive API** service.
-    -   In the sidebar, select **Library** under the **APIs & Services** section.
-    -   Search for the Google Drive API service in the API list and select **Google Drive API**.
-    -   Click the **ENABLE** button to make the Google Drive API Library available.
--   In the sidebar, select **Credentials** under the **APIs & Services** section.
--   Select the **OAuth consent screen** tab, specify the consent screen settings.
-    -   Enter the Application name.
-    -   Choose a Support email.
-    -   Specify the **Authorized domains** which will be allowed to authenticate using OAuth.
-    -   Click the **Save** button.
--   Select the **Credentials** tab, click the Create credentials drop-down and select OAuth client ID.
-    -   In the **Application type** section, select **Web application**.
-    -   In the **Authorized redirect URIs** field, specify the redirect URL.
-    -   Click the **Create** button.
-
-
-<img width="1226" alt="image" src="https://user-images.githubusercontent.com/20472904/202706234-1a3988f8-1020-4862-9bac-bfe0bc389de5.png">
-
-Download this code from
-https://github.com/fareed543/Uploading-files-to-Google-Drive-with-PHP & update index.php
-
-
-```php
-<?php
-session_start();
-$url_array = explode('?', 'http://'.$_SERVER ['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-$url = $url_array[0];
-echo 'URL IS $url ';
-
-
-require_once 'google-api-php-client/src/Google_Client.php';
-require_once 'google-api-php-client/src/contrib/Google_DriveService.php';
-$client = new Google_Client();
-$client->setClientId('623163628428-XXXXX.apps.googleusercontent.com');
-$client->setClientSecret('GOCSPX-XXXX');
-$client->setRedirectUri($url);
-$client->setScopes(array('https://www.googleapis.com/auth/drive'));
-if (isset($_GET['code'])) {
-    $_SESSION['accessToken'] = $client->authenticate($_GET['code']);
-    header('location:'.$url);exit;
-} elseif (!isset($_SESSION['accessToken'])) {
-    $client->authenticate();
-}
-$files= array();
-$dir = dir('BACKUP_DIR');
-while ($file = $dir->read()) {
-    if ($file != '.' && $file != '..') {
-        $files[] = $file;
-    }
-}
-$dir->close();
-if (!empty($_POST)) {
-    $client->setAccessToken($_SESSION['accessToken']);
-    $service = new Google_DriveService($client);
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $file = new Google_DriveFile();
-    foreach ($files as $file_name) {
-        $file_path = 'BACKUP_DIR/'.$file_name;
-        $mime_type = finfo_file($finfo, $file_path);
-        $file->setTitle($file_name);
-        $file->setDescription('This is a '.$mime_type.' document');
-        $file->setMimeType($mime_type);
-        $service->files->insert(
-            $file,
-            array(
-                'data' => file_get_contents($file_path),
-                'mimeType' => $mime_type
-            )
-        );
-    }
-    finfo_close($finfo);
-    header('location:'.$url);exit;
-}
-include 'indexGoogleApi.phtml';
-
-```
-
-
-
-## Ref.
-
-https://www.codexworld.com/upload-file-to-google-drive-using-php/
-
-https://github.com/fareed543/Uploading-files-to-Google-Drive-with-PHP
-
-https://www.youtube.com/watch?v=Af9Myjjz9yg
