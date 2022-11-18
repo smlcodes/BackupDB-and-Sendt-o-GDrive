@@ -27,10 +27,20 @@ while ($file = $dir->read()) {
 }
 $dir->close();
 if (!empty($_POST)) {
+try{
     $client->setAccessToken($_SESSION['accessToken']);
     $service = new Google_DriveService($client);
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $file = new Google_DriveFile();
+    $parentId = '129G8m1NqZvGxCJRF-xXttZ17vwqS1mT2';
+   
+   //set Parent Folder
+    $parent = new Google_ParentReference();
+    $parent->setId($parentId);
+    $file->setParents(array($parent));
+
+ 
+
     foreach ($files as $file_name) {
         $file_path = 'BACKUP_DIR/'.$file_name;
         $mime_type = finfo_file($finfo, $file_path);
@@ -42,10 +52,14 @@ if (!empty($_POST)) {
             array(
                 'data' => file_get_contents($file_path),
                 'mimeType' => $mime_type
+   
             )
         );
     }
     finfo_close($finfo);
     header('location:'.$url);exit;
+    } catch(Exception $e){
+        echo 'An error ocurred : ' . $e->getMessage();
+    }
 }
 include 'indexGoogleApiSubmit.php';
